@@ -5,10 +5,10 @@ from multiprocessing import Process
 import signal
 from pandas import DataFrame
  
-class target(object):
+class targets(object):
 
-	def __init__(self, target, timeout=10):
-		self.target = target
+	def __init__(self, targets, timeout=10):
+		self.targets = targets
 		self.timeout = timeout
 		self.lft_before_df = []
 		# proc = subprocess.Popen(["ifconfig eth0 | awk 'FNR==2{print $2}'"],
@@ -32,9 +32,10 @@ class target(object):
 		# self.host_local_ip = os.system("ifconfig eth0 | awk 'FNR==2{print $2}'")
 
 	def show(self):
-		print "Target: ", self.target
-		print "Local IP: ", self.host_local_ip
-		print "External IP: ", self.host_ext_ip
+		for i, target in enumerate(self.targets):
+			print "Target {0}:\t{1}".format(i+1, target)
+		print "Local IP:\t{0}".format(self.host_local_ip)
+		print "External IP:\t{0}".format(self.host_ext_ip)
 
 	def tcpdump_start(self):
 		subprocess.Popen(["sudo tcpdump",
@@ -82,26 +83,32 @@ class target(object):
 		'''
 		Performs lft on target, saves result as a string to self.results_lft
 		'''
-		print "***Performing lft on:", self.target
-		call_lft = subprocess.Popen(["sudo", "lft", self.target],
-			stdout=subprocess.PIPE)
-		self.results_raw_lft = call_lft.communicate()[0]
-		# print self.results_lft
-		self.parse_test_lft(self.results_raw_lft)
+		for single_target in self.targets:
 
-	def parse_test_lft(self, raw_results_lft):
-		self.results_lft = []
-		for line in raw_results_lft.split("\n"):
-			if "ms" in line:
-				self.results_lft.append(line)
-		del(self.results_raw_lft)
-		# lft_before_df = []
-		for entry in self.results_lft:
-		    self.lft_before_df.append(entry.split())
-		    self.lft_before_df.append(time.ctime())
-		    self.lft_before_df.append(self.target)
+			self.results_lft = []
+			print "***Performing lft on:", single_target
+			call_lft = subprocess.Popen(["sudo", "lft", single_target],
+				stdout=subprocess.PIPE)
+			results_raw_lft = call_lft.communicate()[0]
+			# print self.results_lft
+			# self.parse_test_lft(self.results_raw_lft)
+
+	# def parse_test_lft(self, raw_results_lft):
+		# for single_target in self.targets:
+			
+			for line in results_raw_lft.split("\n"):
+				if "ms" in line:
+					self.results_lft.append(line)
+			del(results_raw_lft)
+			for entry in self.results_lft:
+				entry = entry.replace(" ", ",")
+				entry = entry +","+time.ctime()
+				entry = entry +","+single_target
+			    # self.lft_before_df.append(time.ctime())
+			    # self.lft_before_df.append(single_target)
+				self.lft_before_df.append(entry.split(","))
 		
-	def generate_lft_report(self):
+	def report(self):
 		self.df_lft = DataFrame(self.lft_before_df)
 		self.df_lft.to_csv("results_lft.csv")
 		print "***lft report generated!"
@@ -117,7 +124,7 @@ class target(object):
 		#use this to kill hping3 when it hangs:
 		#subprocess.Poen().send_signal(signal.SIGINT)
 
-		print "***Performing hping3 test on:", self.target
+		print "***Performing hping3 test on:", self.targets
 		start_time=time.time()
 
 		while time.time() < start_time + 5:
@@ -125,7 +132,7 @@ class target(object):
 				"hping3",
 				"-V",
 				"-S",
-				self.target,
+				self.targets,
 				"-T"],
 				stdout=subprocess.PIPE)
 		print "***Test time out"

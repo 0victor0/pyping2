@@ -16,11 +16,11 @@ There are both
 
 ###Import library and instantiate PyPing2 object
 
-Import the library and create an object by passing URL and timeout (optional,
+Import the library and create an object by passing a list of URLs and timeout (optional,
 defaults to 10 seconds).
 
         import PyPing2
-        a = PyPing2.target("www.pingtest.com")
+        a = PyPing2.target(["www.pingtest.com"])
 
 ###Dependency check
 
@@ -48,8 +48,22 @@ At the moment, you can run lft on the target:
 
 ##3. Reporting
 
-After the test completed, the report is generated in `results_lft.csv`.
+After the test completed, you can generate a report to `results_lft.csv`:
+
+        a.report()
 
 ##4. Example uses
 
-Since
+Here's what an example script would look like:
+
+        #! /usr/bin/python
+
+        import pyping2
+
+        domains = ["www.pingtest.com", "www.cnn.com", "www.amazon.com"]
+
+        a = pyping2.targets(domains)
+        a.test_lft()
+        a.report()
+
+Call your script with `sudo python yourscript.py`
