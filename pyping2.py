@@ -14,6 +14,10 @@ class targets(object):
 		self.host_local_ip = str(self.host_local_ip)[:-4]
 		self.host_ext_ip = subprocess.check_output("curl -s -X GET ipinfo.io/ip",
 			shell=True)
+		self._day = time.strftime('%Y_%m_%d')
+		self._results_dir = "pyping2_results/"+self._day
+		self._filename = self._results_dir+"/"+time.strftime('%H_%M_%S')
+		os.system("mkdir -p "+self._results_dir)
 
 	def show(self):
 		for i, target in enumerate(self.targets):
@@ -23,14 +27,18 @@ class targets(object):
 
 	def tcpdump_start(self, interface):
 		self.interface = interface
-		subprocess.Popen(["sudo", "tcpdump",
+		tcpdump_file = self._filename+".pcap"
+		subprocess.Popen([
+			# "sudo",
+			"tcpdump",
 			"-i", self.interface,
-			"-w", time.strftime('%Y_%b_%d_%I_%M_%S')+".pcap"],
+			"-w", tcpdump_file],
 			stdout=subprocess.PIPE)
 		print "***Hit enter to continue on IPython...."
 
 	def tcpdump_stop(self):
 		os.system("pkill tcpdump")
+		print "***pcap written to: "+self._filename+".pcap"
 
 	def check(self):
 		try:
@@ -63,7 +71,11 @@ class targets(object):
 
 			self.results_lft = []
 			print "***Performing lft on:", single_target
-			call_lft = subprocess.Popen(["sudo", "lft", single_target],
+			call_lft = subprocess.Popen([
+				# "sudo",
+				"lft",
+				single_target
+				],
 				stdout=subprocess.PIPE)
 			results_raw_lft = call_lft.communicate()[0]
 			
@@ -78,9 +90,14 @@ class targets(object):
 				self.lft_before_df.append(entry.split(","))
 		
 	def report(self):
+		# if len(self.lft_before_df) == 0:
+		# 	print "*** You must run tests first...."
+		# else:
 		self.df_lft = DataFrame(self.lft_before_df)
-		self.df_lft.to_csv("results_lft.csv")
-		print "***lft report generated!"
+		# self.df_lft.to_csv("pyping2_results/"+time.strftime('%Y_%b_%d_%I_%M_%S')+"results_lft.csv")
+
+		self.df_lft.to_csv(self._filename+"_results_lft.csv")
+		print "***lft report generated: "+self._filename+".csv"
 
 	def _test_hping3(self):
 		'''

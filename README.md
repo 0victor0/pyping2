@@ -15,7 +15,7 @@ To use the library, there are dependencies for GNU/Linux and Python. [Check the 
 Import the library and create an object by passing a list of URLs and timeout (optional, defaults to 10 seconds).
 
         import PyPing2
-        a = PyPing2.targets(["www.pingtest.com", "www.cnn.com"])
+        a = pyping2.targets(["www.pingtest.com", "www.cnn.com"])
 
 ###Dependency check
 
@@ -45,6 +45,8 @@ Stop capture after all tests:
 
         a.tcpdump_stop()
 
+pcap will write to a timestamped location under `pyping2_results`.
+
 ###Tests
 
 To run tests, call the following:
@@ -55,13 +57,13 @@ At the moment, this runs lft on the targets.
 
 ##3. Reporting
 
-After the test completed, you can generate a report to `results_lft.csv`:
+After the test completed, you can generate a report `results_lft.csv` timestamped under `pyping2_results`:
 
         a.report()
 
 ##4. Example uses
 
-Here's what an example script would look like:
+Here's what an example script would look like (taken from [example.py](example.py):
 
         #! /usr/bin/python
 
@@ -70,12 +72,13 @@ Here's what an example script would look like:
         domains = ["www.pingtest.com", "www.cnn.com", "www.amazon.com"]
 
         a = pyping2.targets(domains)
-        a.tcpdump_start()
-        a.test_lft()
+        a.tcpdump_start("eth0")
+        a.tests()
         a.report()
         a.tcpdump_stop()
 
-Call your script with `sudo python yourscript.py`
+Call y
+our script with `sudo python yourscript.py`
 
 ##5. TODO:
 
@@ -85,3 +88,15 @@ More details in the TODO file (mostly Docker-related). Near term improvements:
 + curl-loader
 + report cleaning (currently structured, but not perfect)
 + migrate from CSV adhoc reporting to database (perhaps Docker-based)
+
+##6. Known Bugs:
+
+###Running in Docker on VM:
+
+####lft:
+
++ generates multiple "TCP Port Number Reused" after SYN packet sent -- **issue replicated with NAT and Bridged VM network adapters**
++ mismatch in number of packets received and filtered
++ no issues when running library on VM
++ replicated in 2.2 (apt-get version) and 3.77 (current source)
++ Changing protocols does not improve S/N
