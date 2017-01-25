@@ -1,102 +1,18 @@
-#PyPing2
+#pyping2
 
-##Intro
+Pyping2 is a Python library for performing network analysis. There is an [accompanying Docker image](https://hub.docker.com/r/victorclark/pyping2/) which is based on Debian. If you have all the dependencies installed on your host machine, you can run pyping2 on your host, but the image takes care of all of this for you.
 
-Pyping2 is a Python library for testing network infrastructure. There is an [accompanying Docker image](https://hub.docker.com/r/victorclark/PyPing2/) which is based on Kali Linux, which is based on Debian. If you have all the dependencies installed on your host machine, you can run PyPing2 on your host, but the image takes care of all of this for you.
+Below is a quickstart, check the wiki for more information:
 
-##1. Dependencies
+##Quickstart
 
-To use the library, there are dependencies for GNU/Linux and Python. [Check the Dockerfile](https://github.com/0victor0/Dockerfiles/blob/master/pyping2/Dockerfile) for more information.
-
-##2. Using PyPing2
-
-###Import library and instantiate PyPing2 object
-
-Import the library and create an object by passing a list of URLs and timeout (optional, defaults to 10 seconds).
-
-        import PyPing2
-        a = pyping2.targets(["www.pingtest.com", "www.cnn.com"])
-
-###Dependency check
-
-At any time check the dependencies on your system with the check() module:
-
-        a.check()
-
-Again, if you are working in a container based on the PyPing2 image, you will 
-have no problem.
-
-###Summary
-
-At any time show a summary of the PyPing2 object with the show() module:
-
-        a.show()
-        #Target: www.someURL.com
-        #Host Local IP: 10.0.1.2
-        #External IP: 8.8.8.8
-
-###tcpdump
-
-The library also captures packets on the network interface of your choice:
-
-        a.tcpdump_start()
-
-Stop capture after all tests:
-
-        a.tcpdump_stop()
-
-pcap will write to a timestamped location under `pyping2_results`.
-
-###Tests
-
-To run tests, call the following:
-
-        a.tests()
-
-At the moment, this runs lft on the targets.
-
-##3. Reporting
-
-After the test completed, you can generate a report `results_lft.csv` timestamped under `pyping2_results`:
-
-        a.report()
-
-##4. Example uses
-
-Here's what an example script would look like (taken from [example.py](example.py):
-
-        #! /usr/bin/python
+An overview of the workflow:
 
         import pyping2
-
-        domains = ["www.pingtest.com", "www.cnn.com", "www.amazon.com"]
-
-        a = pyping2.targets(domains)
-        a.tcpdump_start("eth0")
+        a = pyping2.targets(["www.pingtest.com", "www.cnn.com"])
+        a.tcpdump_start()
         a.tests()
         a.report()
         a.tcpdump_stop()
 
-Call y
-our script with `sudo python yourscript.py`
-
-##5. TODO:
-
-More details in the TODO file (mostly Docker-related). Near term improvements:
-
-+ hping3
-+ curl-loader
-+ report cleaning (currently structured, but not perfect)
-+ migrate from CSV adhoc reporting to database (perhaps Docker-based)
-
-##6. Known Bugs:
-
-###Running in Docker on VM:
-
-####lft:
-
-+ generates multiple "TCP Port Number Reused" after SYN packet sent -- **issue replicated with NAT and Bridged VM network adapters**
-+ mismatch in number of packets received and filtered
-+ no issues when running library on VM
-+ replicated in 2.2 (apt-get version) and 3.77 (current source)
-+ Changing protocols does not improve S/N
+At this point, a CSV of test results and pcaps will be written to a timestamped directory under `pyping2_results/`.

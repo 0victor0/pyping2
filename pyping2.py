@@ -74,6 +74,8 @@ class targets(object):
 			call_lft = subprocess.Popen([
 				# "sudo",
 				"lft",
+				"-L",
+				"256",
 				single_target
 				],
 				stdout=subprocess.PIPE)
