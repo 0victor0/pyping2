@@ -1,3 +1,5 @@
+__version__	= "2.0.0"
+
 import subprocess
 import os
 import time

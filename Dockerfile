@@ -1,8 +1,9 @@
 FROM debian:8.6
-# FROM victorclark/pyping2:2.1
+Base image
+# FROM victorclark/pyping2:v2.0.0
 ##Line above for layering dev builds
 
-LABEL version="2.0.0" description="Dockerizing network tools"
+LABEL version="2.1.0" description="Dockerizing network tools"
 MAINTAINER Victor Clark <victor@victorclark.org>
 
 #Link for curl-loader. Last update 2013-06-05. Subdomain may vary
@@ -48,7 +49,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 
 #Download, compile, and create link for curl-loader
-WORKDIR tmp
+WORKDIR /tmp
 RUN curl -X GET $CURL_LOADER_LINK -o $CURL_LOADER_FILE
 RUN tar xjf $CURL_LOADER_FILE
 WORKDIR /tmp/$CURL_LOADER_DIR/
@@ -57,6 +58,7 @@ RUN make
 
 #Download, compile, and create link for curl-loader
 WORKDIR /tmp
+RUN rm -f /bin/lft
 RUN curl -X GET $LFT_LINK -o $LFT_FILE
 RUN tar xvvf $LFT_FILE
 WORKDIR /tmp/$LFT_DIR
@@ -65,8 +67,15 @@ RUN make
 RUN make install
 RUN ln -s /usr/local/bin/lft /bin/lft
 
+#Install pyping2 library
+WORKDIR /tmp
+RUN ls
+COPY pyping2/ pyping2/
+RUN ls
+COPY setup.py .
+RUN ls
+RUN python /tmp/setup.py install
+
 #Put out the welcome mat
 WORKDIR /pyping2
-COPY pyping2.py /pyping2
-COPY example.py /pyping2
 ENTRYPOINT /bin/bash
