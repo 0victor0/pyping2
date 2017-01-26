@@ -1,14 +1,16 @@
-__version__	= "2.0.0"
+__version__	= "2.1.0"
 
 import subprocess
 import os
 import time
 from pandas import DataFrame
+import csv
  
-class targets(object):
+class Targets(object):
 
-	def __init__(self, targets, timeout=10):
-		self.targets = targets
+
+	def __init__(self, targets_csv, timeout=10):
+		self.targets_csv = targets_csv
 		self.timeout = timeout
 		self.lft_before_df = []
 		self.host_local_ip = subprocess.check_output("ip a show eth0 | awk 'FNR==3{print $2}'",
@@ -20,6 +22,13 @@ class targets(object):
 		self._results_dir = "pyping2_results/"+self._day
 		self._filename = self._results_dir+"/"+time.strftime('%H_%M_%S')
 		os.system("mkdir -p "+self._results_dir)
+
+		with open(self.targets_csv) as csv_input:
+			self.targets = []
+			csv_reader = csv.reader(csv_input, delimiter=",")
+			for _list in csv_reader:
+				for entry in _list:
+					self.targets.append(entry.strip())
 
 	def show(self):
 		for i, target in enumerate(self.targets):
