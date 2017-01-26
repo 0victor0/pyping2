@@ -1,5 +1,5 @@
 FROM debian:8.6
-Base image
+# Base image
 # FROM victorclark/pyping2:v2.0.0
 ##Line above for layering dev builds
 
