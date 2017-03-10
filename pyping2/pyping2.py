@@ -23,12 +23,15 @@ class Targets(object):
 		self._filename = self._results_dir+"/"+time.strftime('%H_%M_%S')
 		os.system("mkdir -p "+self._results_dir)
 
-		with open(self.targets_csv) as csv_input:
-			self.targets = []
-			csv_reader = csv.reader(csv_input, delimiter=",")
-			for _list in csv_reader:
-				for entry in _list:
-					self.targets.append(entry.strip())
+		if type(self.targets_csv) is list:
+			pass
+		else:
+			with open(self.targets_csv) as csv_input:
+				self.targets = []
+				csv_reader = csv.reader(csv_input, delimiter=",")
+				for _list in csv_reader:
+					for entry in _list:
+						self.targets.append(entry.strip())
 
 	def show(self):
 		for i, target in enumerate(self.targets):
@@ -78,7 +81,7 @@ class Targets(object):
 		'''
 		Performs lft on target, saves result as a string to self.results_lft
 		'''
-		for single_target in self.targets:
+		for single_target in self.targets_csv:
 
 			self.results_lft = []
 			print "***Performing lft on:", single_target
