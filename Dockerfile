@@ -25,6 +25,7 @@ RUN \
     bzip2 \
     curl \
     gcc \
+	git \
     hping3 \
     ipython \
     less \
@@ -39,7 +40,7 @@ RUN \
     tar \
     tcpdump \
     traceroute \
-    vim 
+    vim
     # zlib1g-dev
 #zlib1g-dev not needed on debian-based build
 
@@ -69,12 +70,8 @@ RUN ln -s /usr/local/bin/lft /bin/lft
 
 #Install pyping2 library
 WORKDIR /tmp
-RUN ls
-COPY pyping2/ pyping2/
-RUN ls
-COPY setup.py .
-RUN ls
-RUN python /tmp/setup.py install
+RUN git clone https://github.com/0victor0/pyping2.git
+RUN python /tmp/pyping2/setup.py install
 
 #Put out the welcome mat
 WORKDIR /pyping2
