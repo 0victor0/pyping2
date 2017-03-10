@@ -3,7 +3,7 @@ FROM debian:8.6
 # FROM victorclark/pyping2:v2.0.0
 ##Line above for layering dev builds
 
-LABEL version="2.1.0" description="Dockerizing network tools"
+LABEL version="0.2.3" description="Dockerizing network tools"
 MAINTAINER Victor Clark <victor@victorclark.org>
 
 #Link for curl-loader. Last update 2013-06-05. Subdomain may vary
@@ -25,6 +25,7 @@ RUN \
     bzip2 \
     curl \
     gcc \
+	git \
     hping3 \
     ipython \
     less \
@@ -39,7 +40,7 @@ RUN \
     tar \
     tcpdump \
     traceroute \
-    vim 
+    vim
     # zlib1g-dev
 #zlib1g-dev not needed on debian-based build
 
@@ -68,13 +69,10 @@ RUN make install
 RUN ln -s /usr/local/bin/lft /bin/lft
 
 #Install pyping2 library
-WORKDIR /tmp
-RUN ls
-COPY pyping2/ pyping2/
-RUN ls
-COPY setup.py .
-RUN ls
-RUN python /tmp/setup.py install
+WORKDIR /
+RUN git clone https://github.com/0victor0/pyping2.git
+WORKDIR /pyping2
+RUN python setup.py install
 
 #Put out the welcome mat
 WORKDIR /pyping2

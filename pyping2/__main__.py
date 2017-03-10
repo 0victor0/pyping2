@@ -1,6 +1,6 @@
-def autoTest(auto_input):
+def autoTest(auto_input, interface="eth0"):
     a = Targets(auto_input)
-    a.tcpdump_start("eth0")
+    a.tcpdump_start(interface)
     a.tests()
     a.report()
     a.tcpdump_stop()
@@ -8,4 +8,7 @@ def autoTest(auto_input):
 if __name__ =='__main__':
     import sys
     from pyping2 import Targets
-    autoTest(sys.argv[1])
+    if len(sys.argv) == 2:
+        autoTest(sys.argv[1])
+    if len(sys.argv) > 2:
+        autoTest(sys.argv[1], sys.argv[2])
