@@ -9,8 +9,9 @@ import csv
 class Targets(object):
 
 
-	def __init__(self, targets_csv, timeout=10):
+	def __init__(self, targets_csv, interface, timeout=10):
 		self.targets_csv = targets_csv
+		self.interface = interface
 		self.timeout = timeout
 		self.lft_before_df = []
 		self.host_local_ip = subprocess.check_output("ip a show eth0 | awk 'FNR==3{print $2}'",
@@ -40,8 +41,7 @@ class Targets(object):
 		print "Local IP:\t{0}".format(self.host_local_ip)
 		print "External IP:\t{0}".format(self.host_ext_ip)
 
-	def tcpdump_start(self, interface):
-		self.interface = interface
+	def tcpdump_start(self):
 		tcpdump_file = self._filename+".pcap"
 		subprocess.Popen([
 			# "sudo",
@@ -49,7 +49,7 @@ class Targets(object):
 			"-i", self.interface,
 			"-w", tcpdump_file],
 			stdout=subprocess.PIPE)
-		print "***Hit enter to continue on IPython...."
+		# print "***Hit enter to continue on IPython...."
 
 	def tcpdump_stop(self):
 		os.system("pkill tcpdump")
@@ -61,18 +61,21 @@ class Targets(object):
 			self.check_lft=1
 		except OSError:
 			print "Need to install layer four traceroute, lft"
+			self.check_lft=0
 		try:
 			subprocess.call(["hping3", "-v"])
 			self.check_hping3=1
 		except OSError:
 			print "Need to install hping3"
+			self.check_hping3=0
 		try:
 			subprocess.call(["curl-loader", "-h"])
-			check_curl_loader = 1
+			self.check_curl_loader=1
 		except OSError:
 			print "Need to install curl-loader, openssl, libssl-dev"
 			print "curl-loader: https://sourceforge.net/projects/curl-loader/files/"
-		if self.check_lft == self.check_hping3 == 1:
+			self.check_curl_loader=1
+		if self.check_lft == self.check_hping3 == self.check_curl_loader == 1:
 			print "\n*** All dependencies installed."
 
 	def tests(self):

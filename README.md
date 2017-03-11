@@ -8,7 +8,7 @@ Below is a quickstart, [check the wiki for more information](https://github.com/
 
 ###Install
 
-Install the library with `python setup.py install`.
+After download, from the install directory, install the library with `python setup.py install`.
 
 ###From the CLI
 
@@ -27,8 +27,8 @@ And if you prefer to write your own script, here is an example flow:
         domains = ["www.pingtest.com", "www.cnn.com", "www.amazon.com"]
         interface = "eth0"
 
-        a = pyping2.Targets(domains)
-        a.tcpdump_start(interface)
+        a = pyping2.Targets(domains, interface)
+        a.tcpdump_start()
         a.tests()
         a.report()
         a.tcpdump_stop()
