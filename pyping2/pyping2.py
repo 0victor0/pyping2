@@ -5,6 +5,7 @@ import os
 import time
 from pandas import DataFrame
 import csv
+import sys
  
 class Targets(object):
 
@@ -59,24 +60,28 @@ class Targets(object):
 		try:
 			subprocess.call(["lft"])
 			self.check_lft=1
+			print "\n***lft found. Use version 3.77 for best results: http://pwhois.org/lft/\n"
 		except OSError:
-			print "Need to install layer four traceroute, lft"
+			print "\n***Not found: layer four traceroute, lft:"
+			print "***\tPlease install from: http://pwhois.org/lft/"
+			print "***\tExiting.\n"
 			self.check_lft=0
-		try:
-			subprocess.call(["hping3", "-v"])
-			self.check_hping3=1
-		except OSError:
-			print "Need to install hping3"
-			self.check_hping3=0
-		try:
-			subprocess.call(["curl-loader", "-h"])
-			self.check_curl_loader=1
-		except OSError:
-			print "Need to install curl-loader, openssl, libssl-dev"
-			print "curl-loader: https://sourceforge.net/projects/curl-loader/files/"
-			self.check_curl_loader=1
-		if self.check_lft == self.check_hping3 == self.check_curl_loader == 1:
-			print "\n*** All dependencies installed."
+			sys.exit()
+		# try:
+		# 	subprocess.call(["hping3", "-v"])
+		# 	self.check_hping3=1
+		# except OSError:
+		# 	print "Need to install hping3"
+		# 	self.check_hping3=0
+		# try:
+		# 	subprocess.call(["curl-loader", "-h"])
+		# 	self.check_curl_loader=1
+		# except OSError:
+		# 	print "Need to install curl-loader, openssl, libssl-dev"
+		# 	print "curl-loader: https://sourceforge.net/projects/curl-loader/files/"
+		# 	self.check_curl_loader=1
+		# if self.check_lft == self.check_hping3 == self.check_curl_loader == 1:
+		# 	print "\n*** All dependencies installed."
 
 	def tests(self):
 		self._test_lft()

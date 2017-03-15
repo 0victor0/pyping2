@@ -1,16 +1,16 @@
-#pyping2
+# pyping2
 
 pyping2 is a Python library for performing network analysis. There is an [accompanying Docker image](https://hub.docker.com/r/victorclark/pyping2/) which is based on Debian. If you have all the dependencies installed on your host machine, you can run pyping2 on your host, but the image takes care of all of this for you.
 
 Below is a quickstart, [check the wiki for more information](https://github.com/0victor0/pyping2/wiki):
 
-##Quickstart
+## Quickstart
 
-###Install
+### Install
 
 After download, from the install directory, install the library with `python setup.py install`.
 
-###From the CLI
+### From the CLI
 
 Place all the URLs you want to test in a comma-separated values file (CSV). As of release 0.2.2, URLs are required to be in the form of `www.somedomain.com` -- no `http[s]://` or trailing `/`. If you have all the dependencies installed, you can run pyping2 from the CLI:
 
@@ -18,7 +18,7 @@ Place all the URLs you want to test in a comma-separated values file (CSV). As o
 
 Test results, a CSV and pcap file, are written to a timestamped directory under `.pyping2_results/`. As of release 0.2.2, the CSV is not completely clean; this is a planned improvement.
 
-###Scripted flow:
+### Scripted flow:
 
 And if you prefer to write your own script, here is an example flow:
 
