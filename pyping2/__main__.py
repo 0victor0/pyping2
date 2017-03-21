@@ -1,7 +1,7 @@
 def autoTest(auto_input, interface="eth0"):
     a = Targets(auto_input, interface)
-    a.tcpdump_start()
     a.check()
+    a.tcpdump_start()
     a.tests()
     a.report()
     a.tcpdump_stop()

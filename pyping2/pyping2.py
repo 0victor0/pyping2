@@ -1,11 +1,21 @@
 __version__	= "2.1.0"
 
+import csv
+import signal
+import socket
 import subprocess
+import sys
 import os
 import time
-from pandas import DataFrame
-import csv
-import sys
+
+try:
+	from pandas import DataFrame
+except ImportError as err:
+	package_problem = str(err).split(" ")[-1]
+	print "\nProblem with packages. Are you using virtualenv?"
+	print "Possible problem with package: {0}".format(package_problem)
+	print "Fix with: pip install {0}".format(package_problem)
+	sys.exit()
  
 class Targets(object):
 
@@ -43,20 +53,30 @@ class Targets(object):
 		print "External IP:\t{0}".format(self.host_ext_ip)
 
 	def tcpdump_start(self):
+
 		tcpdump_file = self._filename+".pcap"
+
 		subprocess.Popen([
 			# "sudo",
 			"tcpdump",
 			"-i", self.interface,
 			"-w", tcpdump_file],
 			stdout=subprocess.PIPE)
-		# print "***Hit enter to continue on IPython...."
-
+		
 	def tcpdump_stop(self):
 		os.system("pkill tcpdump")
 		print "***pcap written to: "+self._filename+".pcap"
 
 	def check(self):
+		try:
+			p=subprocess.check_output(["ifconfig"])
+			if self.interface not in p:
+			    print "\n**** tcpdump error: Try changing name of network interface. Exiting."
+			    sys.exit()
+		except OSError:
+			print "\n***Error: Are you root?"
+			sys.exit()
+
 		try:
 			subprocess.call(["lft"])
 			self.check_lft=1
@@ -67,21 +87,6 @@ class Targets(object):
 			print "***\tExiting.\n"
 			self.check_lft=0
 			sys.exit()
-		# try:
-		# 	subprocess.call(["hping3", "-v"])
-		# 	self.check_hping3=1
-		# except OSError:
-		# 	print "Need to install hping3"
-		# 	self.check_hping3=0
-		# try:
-		# 	subprocess.call(["curl-loader", "-h"])
-		# 	self.check_curl_loader=1
-		# except OSError:
-		# 	print "Need to install curl-loader, openssl, libssl-dev"
-		# 	print "curl-loader: https://sourceforge.net/projects/curl-loader/files/"
-		# 	self.check_curl_loader=1
-		# if self.check_lft == self.check_hping3 == self.check_curl_loader == 1:
-		# 	print "\n*** All dependencies installed."
 
 	def tests(self):
 		self._test_lft()
@@ -99,26 +104,37 @@ class Targets(object):
 				"lft",
 				"-L",
 				"256",
+				"-n",
+				"-h",
 				single_target
 				],
 				stdout=subprocess.PIPE)
 			results_raw_lft = call_lft.communicate()[0]
 			
 			for line in results_raw_lft.split("\n"):
-				if "ms" in line:
-					self.results_lft.append(line)
+				if line.count("ms")>1:
+					self.results_lft.append(line.replace("* ", ""))
 			del(results_raw_lft)
 			for entry in self.results_lft:
-				entry = entry.replace(" ", ",")
+				entry = entry.replace("  ", ",")
 				entry = entry +","+time.ctime()
 				entry = entry +","+single_target
+				try:
+					hostname = socket.gethostbyaddr(entry.split(",")[1])
+					entry = entry + ","+hostname[0]
+				except:
+					entry = entry + ","+"hostname unknown"
+
 				self.lft_before_df.append(entry.split(","))
 		
 	def report(self):
 		# if len(self.lft_before_df) == 0:
 		# 	print "*** You must run tests first...."
 		# else:
-		self.df_lft = DataFrame(self.lft_before_df)
+		self.df_lft = DataFrame(self.lft_before_df,
+			columns = ["hop", "ip addr", "time1 [ms]", "time2 [ms]", "date", "target", "host name"])
+		self.df_lft["time1 [ms]"] = self.df_lft["time1 [ms]"].str.strip(" ms")
+		self.df_lft["time2 [ms]"] = self.df_lft["time2 [ms]"].str.strip(" ms")
 		# self.df_lft.to_csv("pyping2_results/"+time.strftime('%Y_%b_%d_%I_%M_%S')+"results_lft.csv")
 
 		self.df_lft.to_csv(self._filename+"_results_lft.csv")
